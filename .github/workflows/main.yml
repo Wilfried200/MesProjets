@@ -1,0 +1,20 @@
+name: Deploy Todo List to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Ou la branche principale de votre projet
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: TODO LIST  # <-- Remplacez par le nom exact de votre dossier
