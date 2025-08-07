@@ -3,7 +3,7 @@ name: Deploy Todo List to GitHub Pages
 on:
   push:
     branches:
-      - main  # Ou la branche principale de votre projet
+      - master  # Ou la branche principale de votre projet
 
 jobs:
   build-and-deploy:
