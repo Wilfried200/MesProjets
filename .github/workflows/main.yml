@@ -17,4 +17,4 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: TODO LIST  # <-- Remplacez par le nom exact de votre dossier
+        folder: todo_list  # <-- Remplacez par le nom exact de votre dossier
