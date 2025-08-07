@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <link rel="icon" href="./img/WilCodz_transparent.png" type="image/jpg">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Leveling To-Do List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        :root {
+            --primary-dark: #0a0a1a;
+            --primary-blue: #00f0ff;
+            --primary-purple: #6a00ff;
+            --shadow-blue: 0 0 10px rgba(0, 240, 255, 0.7);
+            --shadow-purple: 0 0 15px rgba(106, 0, 255, 0.5);
+        }
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #1a0a2a 100%);
+            min-height: 100vh;
+            color: white;
+            background-image: url('./img/1372162.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-blend-mode: overlay;
+        }
+        
+        .task-item {
+            background: rgba(10, 10, 26, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-blue);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .task-item:hover {
+            box-shadow: var(--shadow-blue), var(--shadow-purple);
+            transform: translateY(-2px);
+        }
+        
+        .completed {
+            text-decoration: line-through;
+            color: rgba(255, 255, 255, 0.5);
+            border-color: var(--primary-purple);
+        }
+        
+        .btn-hunter {
+            background: linear-gradient(45deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            border: none;
+            color: var(--primary-dark);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+        
+        .btn-hunter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ff0000 0%, #ff6b00 100%);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .input-field {
+            background: rgba(10, 10, 26, 0.7);
+            border: 1px solid var(--primary-blue);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            box-shadow: var(--shadow-blue);
+            border-color: var(--primary-purple);
+        }
+        
+        .checkbox-custom {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-custom:checked {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+        
+        .checkbox-custom:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            color: var(--primary-dark);
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .hunter-icon {
+            text-shadow: 0 0 10px var(--primary-blue);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 5px var(--primary-blue);
+        }
+        
+        .stats-box {
+            background: rgba(10, 10, 26, 0.7);
+            border: 1px solid var(--primary-purple);
+            box-shadow: var(--shadow-purple);
+        }
+
+        /* Light theme styles */
+        body.light-theme {
+            background: linear-gradient(135deg, #f0f0f0 0%, #d0d0ff 100%);
+            color: #333;
+        }
+
+        body.light-theme .task-item {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border-color: #6a00ff;
+        }
+
+        body.light-theme .input-field {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border-color: #6a00ff;
+        }
+
+        body.light-theme .completed {
+            color: rgba(51, 51, 51, 0.5);
+        }
+
+        body.light-theme .stats-box {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+        }
+        .shadow-lg {
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+}
+
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-2xl mx-auto">
+
+        <!-- Logo WilCodz -->
+<div class="flex justify-center mb-4">
+  <img src="./img/WilCodz_transparent.png" alt="WilCodz Logo" class="h-80 rounded-full shadow-lg" />
+</div>
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+           
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-skull hunter-icon text-4xl mr-3 text-purple-500"></i>
+                <h1 class="text-3xl md:text-4xl font-bold glow-text">
+                    <span class="text-blue-400">HUNTER'S</span> 
+                    <span class="text-white">TASK</span> 
+                    <span class="text-purple-400">GATE</span>
+                </h1>
+                <i class="fas fa-fire hunter-icon text-4xl ml-3 text-blue-400"></i>
+            </div>
+            <p class="text-blue-300 mb-2">"S-Rank missions await your completion"</p>
+            <!-- <button id="theme-toggle" class="btn-hunter px-4 py-2 rounded-lg text-sm mt-4">
+                <i class="fas fa-moon mr-2"></i> TOGGLE HUNTER MODE
+            </button>
+             -->
+            <!-- Stats Box -->
+            <div class="stats-box rounded-lg p-3 mb-6 flex justify-between max-w-md mx-auto">
+                <div class="text-center">
+                    <div class="text-blue-400 font-bold text-xl" id="total-tasks">0</div>
+                    <div class="text-xs text-gray-400">TOTAL QUESTS</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-purple-400 font-bold text-xl" id="completed-tasks">0</div>
+                    <div class="text-xs text-gray-400">COMPLETED</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-red-400 font-bold text-xl" id="remaining-tasks">0</div>
+                    <div class="text-xs text-gray-400">REMAINING</div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Add Task Form -->
+        <div class="mb-8">
+            <form id="task-form" class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="task-input" 
+                    placeholder="Enter your quest..." 
+                    class="input-field flex-grow p-3 rounded-lg focus:outline-none"
+                    required
+                >
+                <button type="submit" class="btn-hunter px-6 py-3 rounded-lg font-bold flex items-center">
+                    <i class="fas fa-plus mr-2"></i> ADD
+                </button>
+            </form>
+        </div>
+        
+        <!-- Task List -->
+        <div id="task-list" class="space-y-3">
+            <!-- Tasks will be added here dynamically -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="empty-state" class="text-center py-12">
+            <i class="fas fa-dungeon text-5xl text-gray-500 mb-4"></i>
+            <h3 class="text-xl text-gray-400 mb-2">No quests assigned</h3>
+            <p class="text-gray-500">Add your first quest to begin your hunter journey</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const taskForm = document.getElementById('task-form');
+            const taskInput = document.getElementById('task-input');
+            const taskList = document.getElementById('task-list');
+            const emptyState = document.getElementById('empty-state');
+            
+            // Stats elements
+            const totalTasksEl = document.getElementById('total-tasks');
+            const completedTasksEl = document.getElementById('completed-tasks');
+            const remainingTasksEl = document.getElementById('remaining-tasks');
+            
+            // Load tasks from localStorage
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            
+            // Render tasks
+            function renderTasks() {
+                taskList.innerHTML = '';
+                
+                if (tasks.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+                
+                tasks.forEach((task, index) => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = `task-item p-4 rounded-lg flex items-center justify-between ${task.completed ? 'completed' : ''}`;
+                    
+                    taskItem.innerHTML = `
+                        <div class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                class="checkbox-custom mr-3" 
+                                ${task.completed ? 'checked' : ''}
+                                data-index="${index}"
+                            >
+                            <span class="${task.completed ? 'text-gray-500' : 'text-white'}">${task.text}</span>
+                        </div>
+                        <button 
+                            class="btn-hunter btn-danger px-3 py-1 rounded text-sm delete-btn" 
+                            data-index="${index}"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    
+                    taskList.appendChild(taskItem);
+                });
+                
+                updateStats();
+            }
+            
+            // Update statistics
+            function updateStats() {
+                const total = tasks.length;
+                const completed = tasks.filter(task => task.completed).length;
+                const remaining = total - completed;
+                
+                totalTasksEl.textContent = total;
+                completedTasksEl.textContent = completed;
+                remainingTasksEl.textContent = remaining;
+            }
+            
+            // Add new task
+            taskForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const taskText = taskInput.value.trim();
+                if (taskText) {
+                    tasks.push({ text: taskText, completed: false });
+                    saveTasks();
+                    renderTasks();
+                    taskInput.value = '';
+                }
+            });
+            
+            // Toggle task completion
+            taskList.addEventListener('change', function(e) {
+                if (e.target.classList.contains('checkbox-custom')) {
+                    const index = e.target.getAttribute('data-index');
+                    tasks[index].completed = !tasks[index].completed;
+                    saveTasks();
+                    renderTasks();
+                }
+            });
+            
+            // Delete task
+            taskList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-btn') || e.target.parentElement.classList.contains('delete-btn')) {
+                    const index = e.target.classList.contains('delete-btn') 
+                        ? e.target.getAttribute('data-index')
+                        : e.target.parentElement.getAttribute('data-index');
+                    
+                    // Animation effect
+                    const taskElement = e.target.closest('.task-item');
+                    taskElement.style.transform = 'translateX(100%)';
+                    taskElement.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        tasks.splice(index, 1);
+                        saveTasks();
+                        renderTasks();
+                    }, 300);
+                }
+            });
+            
+            // Save tasks to localStorage
+            function saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+            
+            // Initial render
+            renderTasks();
+            
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            
+            if (currentTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggle.innerHTML = '<i class="fas fa-sun mr-2"></i> TOGGLE HUNTER MODE';
+            }
+
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                
+                if (document.body.classList.contains('light-theme')) {
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.innerHTML = '<i class="fas fa-sun mr-2"></i> TOGGLE HUNTER MODE';
+                } else {
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.innerHTML = '<i class="fas fa-moon mr-2"></i> TOGGLE HUNTER MODE';
+                }
+            });
+
+            // Add pulse animation to the add button
+            const addButton = taskForm.querySelector('button');
+            setInterval(() => {
+                addButton.classList.toggle('pulse');
+            }, 2000);
+        });
+    </script>
+    <!-- Footer -->
+<footer class="text-center text-sm text-gray-500 mt-10">
+    <div class="flex justify-center items-center gap-2 mb-2">
+        <img src="img/WilCodz_transparent.png" alt="WilCodz Logo" class="h-40 rounded-full" />
+        <p class="text-white">Développé avec ❤️ par <strong>WilCodz</strong></p>
+    </div>
+</footer>
+
+</body>
+</html>
