@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePass - Gestionnaire de mots de passe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .password-strength {
+            height: 4px;
+            width: 0%;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .password-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .password-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark mode styles */
+        .dark body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+
+        .dark .password-card,
+        .dark .modal > div {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .dark input,
+        .dark .password-display {
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+
+        .dark .text-gray-900 {
+            color: #e2e8f0;
+        }
+
+        .dark .text-gray-600,
+        .dark .text-gray-500 {
+            color: #a0aec0;
+        }
+
+        .dark .bg-white {
+            background-color: #2d3748;
+        }
+
+        .dark .bg-gray-100 {
+            background-color: #4a5568;
+        }
+
+        .dark .bg-indigo-100 {
+            background-color: #434190;
+        }
+
+        .dark .bg-gray-800 {
+            background-color: #1a202c;
+        }
+        
+        .modal {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+        
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        .password-input-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #64748b;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-lock text-indigo-600 text-xl mr-2"></i>
+                        <span class="text-xl font-semibold text-gray-900">SecurePass</span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button id="theme-toggle" class="p-2 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <section class="text-center py-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Gérez vos mots de passe en toute sécurité</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+                SecurePass vous permet de générer et stocker des mots de passe forts pour tous vos comptes en ligne.
+            </p>
+            <button id="open-modal" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg shadow-md transition duration-300 transform hover:scale-105">
+                <i class="fas fa-plus mr-2"></i>Ajouter un mot de passe
+            </button>
+        </section>
+
+        <!-- Password List Section -->
+        <section>
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">Vos mots de passe</h2>
+            <div id="password-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Password cards will be added here dynamically -->
+            </div>
+            
+            <div id="empty-state" class="text-center py-12">
+                <i class="fas fa-key text-gray-300 text-5xl mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-500 mb-2">Aucun mot de passe enregistré</h3>
+                <p class="text-gray-400 mb-4">Commencez par ajouter votre premier mot de passe</p>
+                <button id="open-modal-empty" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow">
+                    <i class="fas fa-plus mr-2"></i>Ajouter un mot de passe
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Password Modal -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 modal">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Ajouter un mot de passe</h3>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="password-form">
+                    <div class="mb-4">
+                        <label for="label" class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+                        <input type="text" id="label" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex: Email Gmail, Facebook..." required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                        <div class="password-input-container">
+                            <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 pr-10" required>
+                            <span class="toggle-password" id="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="flex items-center mt-2">
+                            <input type="range" id="length" min="6" max="32" value="12" class="w-full mr-3">
+                            <span id="length-value" class="text-sm font-medium text-gray-700">12</span>
+                        </div>
+                        <div class="password-strength mt-1 rounded-full"></div>
+                    </div>
+                    
+                    <div class="flex justify-between mb-6">
+                        <button type="button" id="generate-password" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center">
+                            <i class="fas fa-random mr-1"></i> Générer automatiquement
+                        </button>
+                        <div class="text-sm text-gray-500" id="strength-text">Force : <span id="strength-level">-</span></div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-modal" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Annuler
+                        </button>
+                        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Valider
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-md shadow-lg transform translate-y-10 opacity-0 transition-all duration-300">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2 text-green-400"></i>
+            <span id="toast-message">Mot de passe copié !</span>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const openModalBtn = document.getElementById('open-modal');
+        const openModalEmptyBtn = document.getElementById('open-modal-empty');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelModalBtn = document.getElementById('cancel-modal');
+        const modal = document.getElementById('modal');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password');
+        const labelInput = document.getElementById('label');
+        const generatePasswordBtn = document.getElementById('generate-password');
+        const lengthInput = document.getElementById('length');
+        const lengthValue = document.getElementById('length-value');
+        const passwordList = document.getElementById('password-list');
+        const emptyState = document.getElementById('empty-state');
+        const togglePassword = document.getElementById('toggle-password');
+        const strengthBar = document.querySelector('.password-strength');
+        const strengthText = document.getElementById('strength-text');
+        const strengthLevel = document.getElementById('strength-level');
+        const toast = document.getElementById('toast');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        
+        // Variables
+        let passwords = JSON.parse(localStorage.getItem('passwords')) || [];
+        
+        // Initialize the app
+        function init() {
+            renderPasswordList();
+            updateEmptyState();
+            
+            // Load theme preference
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+        }
+        
+        // Render password list
+        function renderPasswordList() {
+            passwordList.innerHTML = '';
+            
+            passwords.forEach((password, index) => {
+                const passwordCard = document.createElement('div');
+                passwordCard.className = 'password-card bg-white rounded-lg shadow p-5 fade-in';
+                passwordCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-medium text-gray-900 truncate">${password.label}</h4>
+                        <button class="delete-password text-gray-400 hover:text-red-500" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="password" value="${password.password}" class="password-display bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm flex-grow font-mono" readonly>
+                        <button class="copy-password ml-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded p-2" data-password="${password.password}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="toggle-display ml-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded p-2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                `;
+                passwordList.appendChild(passwordCard);
+            });
+            
+            // Add event listeners to new elements
+            document.querySelectorAll('.delete-password').forEach(btn => {
+                btn.addEventListener('click', deletePassword);
+            });
+            
+            document.querySelectorAll('.copy-password').forEach(btn => {
+                btn.addEventListener('click', copyPassword);
+            });
+            
+            document.querySelectorAll('.toggle-display').forEach(btn => {
+                btn.addEventListener('click', togglePasswordDisplay);
+            });
+        }
+        
+        // Update empty state visibility
+        function updateEmptyState() {
+            if (passwords.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+        
+        // Generate random password
+        function generatePassword(length = 12) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+            let password = '';
+            
+            for (let i = 0; i < length; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            return password;
+        }
+        
+        // Check password strength
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            if (password.length >= 16) strength += 1;
+            
+            // Character variety checks
+            if (/[A-Z]/.test(password)) strength += 1;
+            if (/[a-z]/.test(password)) strength += 1;
+            if (/[0-9]/.test(password)) strength += 1;
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            return strength;
+        }
+        
+        // Update password strength indicator
+        function updateStrengthIndicator(password) {
+            const strength = checkPasswordStrength(password);
+            let width = 0;
+            let color = '';
+            let level = '';
+            
+            if (password.length === 0) {
+                width = 0;
+                level = '-';
+            } else if (strength <= 3) {
+                width = 33;
+                color = 'bg-red-500';
+                level = 'Faible';
+            } else if (strength <= 6) {
+                width = 66;
+                color = 'bg-yellow-500';
+                level = 'Moyen';
+            } else {
+                width = 100;
+                color = 'bg-green-500';
+                level = 'Fort';
+            }
+            
+            strengthBar.style.width = `${width}%`;
+            strengthBar.className = `password-strength mt-1 rounded-full ${color}`;
+            strengthLevel.textContent = level;
+        }
+        
+        // Show toast notification
+        function showToast(message) {
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.textContent = message;
+            
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-10', 'opacity-0');
+            }, 3000);
+        }
+        
+        // Toggle password visibility
+        function togglePasswordVisibility(input, icon) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+        
+        // Event Listeners
+        openModalBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+        });
+        
+        openModalEmptyBtn.addEventListener('click', () => {
+            modal.classList.add('active');
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        cancelModalBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        lengthInput.addEventListener('input', () => {
+            lengthValue.textContent = lengthInput.value;
+        });
+        
+        generatePasswordBtn.addEventListener('click', () => {
+            const length = parseInt(lengthInput.value);
+            const generatedPassword = generatePassword(length);
+            passwordInput.value = generatedPassword;
+            updateStrengthIndicator(generatedPassword);
+        });
+        
+        passwordInput.addEventListener('input', (e) => {
+            updateStrengthIndicator(e.target.value);
+        });
+        
+        togglePassword.addEventListener('click', () => {
+            const icon = togglePassword.querySelector('i');
+            togglePasswordVisibility(passwordInput, icon);
+        });
+        
+        passwordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const label = labelInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!label || !password) return;
+            
+            // Add new password
+            passwords.push({ label, password });
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+            
+            // Reset form
+            passwordForm.reset();
+            lengthInput.value = 12;
+            lengthValue.textContent = '12';
+            strengthBar.style.width = '0%';
+            strengthLevel.textContent = '-';
+            
+            // Close modal
+            modal.classList.remove('active');
+            
+            // Update UI
+            renderPasswordList();
+            updateEmptyState();
+            
+            // Show success toast
+            showToast('Mot de passe ajouté avec succès !');
+        });
+        
+        // Delete password
+        function deletePassword(e) {
+            const index = e.target.closest('button').dataset.index;
+            passwords.splice(index, 1);
+            localStorage.setItem('passwords', JSON.stringify(passwords));
+            renderPasswordList();
+            updateEmptyState();
+            showToast('Mot de passe supprimé !');
+        }
+        
+        // Copy password to clipboard
+        function copyPassword(e) {
+            const password = e.target.closest('button').dataset.password;
+            navigator.clipboard.writeText(password).then(() => {
+                showToast('Mot de passe copié !');
+            });
+        }
+        
+        // Toggle password display
+        function togglePasswordDisplay(e) {
+            const card = e.target.closest('.password-card');
+            const input = card.querySelector('.password-display');
+            const icon = e.target.tagName === 'I' ? e.target : e.target.querySelector('i');
+            togglePasswordVisibility(input, icon);
+        }
+        
+        // Toggle dark/light theme
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            themeToggleBtn.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+            
+            // Force redraw for smooth transition
+            document.body.style.display = 'none';
+            document.body.offsetHeight;
+            document.body.style.display = '';
+        });
+
+        // Watch for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('theme')) {
+                loadTheme();
+            }
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+        
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
